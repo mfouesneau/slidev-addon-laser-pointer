@@ -57,7 +57,9 @@ It opens a panel with:
 
 Your choice beats the deck's `laserPointer` config and the stock look, in that order.
 It only affects your own screen: nothing is synced to the audience, and it resets when you reload the page.
-Slide shortcuts are paused while the panel is open, so typing in it won't change slides. The button is hidden when printing or exporting.
+Slide shortcuts are paused while the panel is open, so typing in it won't change slides. To keep a clicker from going dead,
+the panel closes on **Escape**, on a click outside it, and after 10 seconds without interaction.
+The button is not drawn in export or print renders.
 Works whether or not the deck has a `laserPointer` config, so a deck with no config still gets the button.
 
 Notes:
@@ -126,3 +128,5 @@ Later: speaker-controlled live UI synced to the audience.
 - **2026-11-11** — README rewritten as the addon doc (install, enable, options, presets); local-path install + enable-by-name verified in a clean consumer project. ADDON-README.md removed (npm ships README.md).
 - **2026-11-11** — sharedState spike (see docs/design.md, "Spike: sharedState"): extra fields sync in dev and static builds; deletes do not sync in static builds. Spike files in spike/ (throwaway). Corrected the `addons:` relative-path rule.
 - **2026-11-11** — Speaker UI v1 built (floating button, local-only, session-only; decisions in docs/design.md addendum). 31 unit tests; scripts/check-ui.mjs 10 checks; verified from a packed tarball in a clean project. Dev note: start the two demo servers a few seconds apart (shared Vite cache race).
+- **2026-11-11** — Review fix pass 2 (speaker UI): shortcut lock now released on Escape / outside click / 10 s idle; CSS variables are refcounted so one unmounting instance cannot wipe another's; focus no longer left on the toggle (Space re-opened it); a broken author config no longer disables the speaker's choices; slider range follows the author size; toggle opacity .2 -> .6 with a focus ring; no control on export/print routes. 46 unit tests, 19 e2e checks (new ones verified to fail on the old code; the opacity check was fixed after it passed vacuously under hover).
+  Deferred minors: panel `max-width` on small screens; aria-controls/focus move into the dialog; laser stops tracking while the mouse is over the panel; panel closes (not preserved) if its owning instance unmounts; component-level tests (happy-dom); wiring the e2e servers into an npm script; plus the earlier ones (block `url()` colors, size cap, license/repository, size-only e2e case).

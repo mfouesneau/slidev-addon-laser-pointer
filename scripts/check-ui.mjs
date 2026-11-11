@@ -62,6 +62,50 @@ check('stock deck: override applies', d.bg === 'rgb(213, 94, 0)', d)
 await page.reload(); await page.waitForSelector('.slidev-slide-container')
 d = await dot(page)
 check('reload resets (session only)', d.width === '6px' && d.bg === 'rgba(0, 0, 0, 0)', d)
+// 5. the panel must never leave a speaker with a dead clicker or a hidden-key trap
+const panel = page => page.locator('.slidev-laser-control .panel').count()
+const IDLE_MS = 10_000
+
+page = await open(browser, `${cfgBase}/1`)
+await page.click('.slidev-laser-control .toggle')
+await page.keyboard.press('Escape'); await page.waitForTimeout(300)
+check('Escape closes the panel', (await panel(page)) === 0, await panel(page))
+await page.keyboard.press('ArrowRight'); await page.waitForTimeout(500)
+check('shortcuts work again after Escape', /\/2$/.test(page.url()), page.url())
+await page.close()
+
+page = await open(browser, `${cfgBase}/1`)
+await page.click('.slidev-laser-control .toggle')
+await page.mouse.click(300, 200); await page.waitForTimeout(300)
+check('click outside closes the panel', (await panel(page)) === 0, await panel(page))
+await page.close()
+
+page = await open(browser, `${cfgBase}/1`)
+await page.click('.slidev-laser-control .toggle')
+await page.click('.slidev-laser-control .toggle')   // close via the button, focus used to stay on it
+await page.keyboard.press('Space'); await page.waitForTimeout(500)
+check('Space after closing does not re-open the panel', (await panel(page)) === 0, await panel(page))
+check('Space after closing advances the slide', /\/2$/.test(page.url()), page.url())
+await page.mouse.move(200, 200); await page.waitForTimeout(400)   // hover would force opacity 1
+const opacity = await page.$eval('.slidev-laser-control .toggle', el => Number(getComputedStyle(el).opacity))
+check('resting toggle opacity is .5-.99 (findable, and not just hovered)', opacity >= 0.5 && opacity < 1, opacity)
+await page.close()
+
+page = await open(browser, `${cfgBase}/1`)
+await page.click('.slidev-laser-control .toggle')
+await page.waitForTimeout(IDLE_MS + 800)
+check('idle panel closes itself', (await panel(page)) === 0, await panel(page))
+await page.close()
+
+// 6. no control on export/print routes (PNG export uses screen media, where CSS print rules do not apply)
+for (const path of ['/export/', '/1?print=true']) {
+  page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
+  await page.goto(`${cfgBase}${path}`)
+  await page.waitForTimeout(3000)
+  check(`no control on ${path}`, (await controls(page)) === 0, await controls(page))
+  await page.close()
+}
+
 await browser.close()
 
 if (failures.length) { console.error('\nFAILED:', failures.join('; ')); process.exit(1) }
