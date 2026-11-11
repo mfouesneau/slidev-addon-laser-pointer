@@ -62,7 +62,7 @@ Chosen: B. Fallback to C if the CSS override proves brittle.
 
 ## Findings (build, 2026-11-11)
 - `$slidev.configs` does expose custom headmatter keys (verified). In `global-top.vue` it is read via `useSlideContext().$slidev.configs`; importing `@slidev/client/env` does not resolve.
-- Addon path in `addons:` resolves from the working directory, not from the deck file.
+- Relative `addons:` paths resolve from the **parent of the folder containing the deck file** (4 observations on Slidev 53.1.0; earlier note "working directory" was wrong). Installed packages by name are unaffected.
 - The laser is localStorage-controlled per client: `slidev-cursor-style` stores the raw string `laser`.
 - Class + variables are removed on HMR / config removal (verified); presenter view gets the override too.
 - Implementation uses a gating class (`html.slidev-laser-custom`) rather than CSS fallbacks equal to stock.
@@ -71,3 +71,26 @@ Chosen: B. Fallback to C if the CSS override proves brittle.
 1. Replace the config read in `global-top.vue` with a ref: author config = default, speaker choice (localStorage) = override. CSS layer unchanged.
 2. A UI: Slidev's Settings panel is internal, so either a small floating control in `global-top.vue` or a presenter-page slot; color swatches (the presets) plus a size slider.
 3. Audience sync: each client draws its own dot, so the presenter's choice must reach viewers. Slidev's `createSyncState(serverState, defaultState, persist)` (`@slidev/client/state/syncState`) is the mechanism behind `sharedState` (carries `cursor: {x, y, style}`). Open question, needs a spike: whether an addon can open its own channel (needs a server-side counterpart) or can safely piggyback extra fields on `sharedState` and have them survive the server round-trip. Fallback with no sync: the speaker's choice only affects their own screen, and viewers keep the author's config.
+
+## Spike: sharedState (2026-11-11, throwaway code in `spike/`)
+Question: can an addon put an extra field on Slidev's public `sharedState` and have it sync to viewers without breaking Slidev's own state?
+Method: `spike/addon/global-top.vue` exposes `sharedState` as `window.__shared`; `spike/spike-sync.mjs` drives a presenter page and a viewer page (same browser context), plus a late-joining page. Run in a separate project (see Gotchas).
+
+| check | dev server (websocket) | static build (BroadcastChannel) |
+|---|---|---|
+| built-in `page` presenter -> viewer (control) | works | works |
+| extra field `laserPointer` presenter -> viewer | works | works (same browser only) |
+| late joiner receives the extra field | works | **no** (live messages only) |
+| `page` still syncs after extra field exists | works | works |
+| deleting the extra field reaches viewers | works | **no**: key stays on viewers |
+
+Conclusions for the speaker UI:
+- Piggybacking one namespaced key on `sharedState` is viable. `sharedState`, `onSharedUpdate` and `createSyncState` are public exports of `@slidev/client`.
+- Static builds sync only between tabs of one browser (Slidev's own limitation), and late joiners start from the author config.
+- Never `delete` the key; replace the whole value (`null` or `{}` = no override).
+- Safeguards to build in: (1) one key, `laserPointer`, replaced as a whole object, never mutated per field; (2) every read goes through `resolveLaser` and on any error falls back to the author config with a `console.warn`; (3) only the presenter writes (`useNav().isPresenter`); (4) feature-detect (`sharedState` is an object) and wrap the write in try/catch so a Slidev change cannot break the deck; (5) the type `SharedState` has no such key, so cast in one small helper module; (6) precedence: speaker override > author config > stock.
+- Not tested: multi-machine dev-server session, `slidev --remote`, a Slidev version other than 53.1.0.
+
+### Gotchas hit during the spike
+- A spike component starting with `;(window as any).x = ...` crashed `GlobalTop` with `_useSlideContext(...) is not a function` (Slidev injects code into global layers; leading `;(` collides with it). Write plain statements.
+- Running a spike deck from inside the pad collided with the real `global-top.vue` at the pad root (Slidev picks up the root-level file). Use a separate project.

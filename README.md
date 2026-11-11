@@ -11,7 +11,7 @@ Requires Slidev >= 53 (the addon only uses `global-top.vue`, a stylesheet and th
 Not on npm yet. Until it is, pick one:
 
 ```bash
-# from a local checkout (path is resolved from where you run `slidev`)
+# from a local checkout
 npm install --save-dev /path/to/slidev-addon-laser-pointer
 
 # or straight from a git remote, once pushed
@@ -35,8 +35,8 @@ laserPointer:
 ---
 ```
 
-Using it from a local path instead of an installed package: `addons: [./path/to/addon]`.
-The path is resolved from the directory you start `slidev` in, not from the deck file.
+Prefer the installed package name. A relative path in `addons:` (`addons: [./path/to/addon]`) is resolved
+from the parent of the folder that holds your deck file (observed with Slidev 53.1.0), which is easy to get wrong.
 
 Then turn the laser on while presenting: Settings (gear icon) > Cursor style > **Laser**.
 The addon changes how the laser looks; it does not turn it on.
@@ -104,3 +104,4 @@ Later: speaker-controlled live UI synced to the audience.
 - **2026-11-11** — Built v0.0.1: resolver (11 unit tests), addon (global-top.vue + styles), demo decks, e2e check (configured: 14px okabe-blue; stock: 6px red gradient), HMR cleanup verified. UI-sync findings in docs/design.md. Addon usage: top of this README.
 - **2026-11-11** — Review fix pass: strict validation (unknown keys, bad color/glow/config type, mistyped okabe preset, browser CSS.supports check), fail-soft to stock with console.warn. 24 tests. Deferred minors: block `url()` colors, size cap, license/repository, size-only e2e case.
 - **2026-11-11** — README rewritten as the addon doc (install, enable, options, presets); local-path install + enable-by-name verified in a clean consumer project. ADDON-README.md removed (npm ships README.md).
+- **2026-11-11** — sharedState spike (see docs/design.md, "Spike: sharedState"): extra fields sync in dev and static builds; deletes do not sync in static builds. Spike files in spike/ (throwaway). Corrected the `addons:` relative-path rule.
