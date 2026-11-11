@@ -2,6 +2,8 @@
   "name": "slidev-addon-laser-pointer",
   "version": "0.0.2",
   "description": "Slidev addon: configurable laser pointer color and size",
+  "license": "BSD-3-Clause",
+  "author": "Morgan Fouesneau",
   "type": "module",
   "keywords": [
     "slidev-addon",
