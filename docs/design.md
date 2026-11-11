@@ -91,6 +91,5 @@ Conclusions for the speaker UI:
 - Safeguards to build in: (1) one key, `laserPointer`, replaced as a whole object, never mutated per field; (2) every read goes through `resolveLaser` and on any error falls back to the author config with a `console.warn`; (3) only the presenter writes (`useNav().isPresenter`); (4) feature-detect (`sharedState` is an object) and wrap the write in try/catch so a Slidev change cannot break the deck; (5) the type `SharedState` has no such key, so cast in one small helper module; (6) precedence: speaker override > author config > stock.
 - Not tested: multi-machine dev-server session, `slidev --remote`, a Slidev version other than 53.1.0.
 
-### Gotchas hit during the spike
-- A spike component starting with `;(window as any).x = ...` crashed `GlobalTop` with `_useSlideContext(...) is not a function` (Slidev injects code into global layers; leading `;(` collides with it). Write plain statements.
-- Running a spike deck from inside the pad collided with the real `global-top.vue` at the pad root (Slidev picks up the root-level file). Use a separate project.
+### Gotcha hit during the spike
+- A spike component written as `;(window as any).x = ...` crashed `GlobalTop` with `_useSlideContext(...) is not a function`, in the pad and in a clean project alike. Rewriting it as plain statements (`const w = window as any; w.x = ...`) fixed it. The root cause is unverified (suspect: Slidev injects code into global layers and the leading `;(` collides with it). Avoid that form.
