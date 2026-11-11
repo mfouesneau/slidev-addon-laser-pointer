@@ -1,0 +1,7 @@
+/* Applies only when global-top.vue has set the gating class (laserPointer configured). */
+html.slidev-laser-custom .slidev-slide-container .laser-pointer {
+  width: var(--slidev-laser-size, 6px) !important;
+  height: var(--slidev-laser-size, 6px) !important;
+  background: var(--slidev-laser-color, rgb(255 0 0)) !important;
+  box-shadow: var(--slidev-laser-glow, none) !important;
+}

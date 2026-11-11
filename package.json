@@ -3,9 +3,18 @@
   "version": "0.0.1",
   "description": "Slidev addon: configurable laser pointer color and size",
   "type": "module",
-  "keywords": ["slidev-addon", "slidev"],
-  "engines": { "slidev": ">=53.0.0" },
-  "files": ["global-top.vue", "styles", "src"],
+  "keywords": [
+    "slidev-addon",
+    "slidev"
+  ],
+  "engines": {
+    "slidev": ">=53.0.0"
+  },
+  "files": [
+    "global-top.vue",
+    "styles",
+    "src"
+  ],
   "scripts": {
     "test": "vitest run",
     "demo": "slidev demo/slides.md --port 3031",
@@ -13,7 +22,11 @@
     "check": "node scripts/check-laser.mjs"
   },
   "devDependencies": {
+    "@slidev/cli": "^53.1.0",
+    "@slidev/theme-default": "^0.25.0",
+    "playwright-chromium": "^1.65.0",
     "typescript": "^5.6.0",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "vue": "^3.5.45"
   }
 }
