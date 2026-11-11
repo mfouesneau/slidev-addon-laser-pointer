@@ -17,7 +17,15 @@ function clear() {
 
 watchEffect(() => {
   clear()
-  const vars = resolveLaser($slidev.configs.laserPointer as any)
+  let vars: Record<string, string> | null
+  try {
+    vars = resolveLaser($slidev.configs.laserPointer as any, { isColor: c => CSS.supports('color', c) })
+  }
+  catch (err) {
+    // Fail soft during a talk: keep the stock pointer, but say why.
+    console.warn(`[slidev-addon-laser-pointer] ${(err as Error).message}; using the stock pointer.`)
+    return
+  }
   if (!vars)
     return
   for (const [name, value] of Object.entries(vars)) {

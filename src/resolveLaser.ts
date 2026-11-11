@@ -26,20 +26,52 @@ function glowFor(color: string): string {
   return `0 0 10px ${mix(90)}, 0 0 22px ${mix(55)}`
 }
 
+const ALLOWED_KEYS = ['color', 'size', 'glow']
+
+/** Optional hooks. `isColor` lets the browser vet non-preset colors (e.g. `CSS.supports`). */
+export interface ResolveOptions {
+  isColor?: (value: string) => boolean
+}
+
 /**
  * Resolve the `laserPointer` config into CSS variables.
  * Returns null when nothing is configured (stock look must be kept).
- * Throws when `size` is not a positive finite number.
+ * Throws a descriptive Error on any invalid value or unknown key.
  */
-export function resolveLaser(config: LaserConfig | undefined): Record<string, string> | null {
-  if (!config || Object.keys(config).length === 0)
+export function resolveLaser(
+  config: LaserConfig | undefined,
+  options: ResolveOptions = {},
+): Record<string, string> | null {
+  if (config === undefined)
     return null
+  if (typeof config !== 'object' || config === null || Array.isArray(config))
+    throw new Error(`laserPointer must be an object with keys ${ALLOWED_KEYS.join(', ')}, got ${JSON.stringify(config)}`)
+  if (Object.keys(config).length === 0)
+    return null
+
+  const unknown = Object.keys(config).filter(k => !ALLOWED_KEYS.includes(k))
+  if (unknown.length)
+    throw new Error(`laserPointer: unknown key(s) ${unknown.join(', ')}; allowed: ${ALLOWED_KEYS.join(', ')}`)
 
   const vars: Record<string, string> = {}
   let color: string | undefined
 
   if (config.color !== undefined) {
-    color = PRESETS[config.color] ?? config.color
+    const raw = config.color
+    if (typeof raw !== 'string' || raw.trim() === '')
+      throw new Error(`laserPointer.color must be a preset name or CSS color string, got ${JSON.stringify(raw)}`)
+    if (Object.hasOwn(PRESETS, raw)) {
+      color = PRESETS[raw]
+    }
+    else if (raw.startsWith('okabe-')) {
+      throw new Error(`laserPointer.color: unknown preset ${JSON.stringify(raw)}; presets: ${Object.keys(PRESETS).join(', ')}`)
+    }
+    else if (options.isColor && !options.isColor(raw)) {
+      throw new Error(`laserPointer.color: ${JSON.stringify(raw)} is not a valid CSS color; presets: ${Object.keys(PRESETS).join(', ')}`)
+    }
+    else {
+      color = raw
+    }
     vars['--slidev-laser-color'] = color
   }
 
@@ -50,10 +82,10 @@ export function resolveLaser(config: LaserConfig | undefined): Record<string, st
     vars['--slidev-laser-size'] = `${size}px`
   }
 
-  if (config.glow === false)
-    vars['--slidev-laser-glow'] = 'none'
-  else
-    vars['--slidev-laser-glow'] = glowFor(color ?? STOCK_COLOR)
+  if (config.glow !== undefined && typeof config.glow !== 'boolean')
+    throw new Error(`laserPointer.glow must be true or false, got ${JSON.stringify(config.glow)}`)
+
+  vars['--slidev-laser-glow'] = config.glow === false ? 'none' : glowFor(color ?? STOCK_COLOR)
 
   return vars
 }

@@ -32,4 +32,27 @@ describe('resolveLaser', () => {
     expect(vars).not.toHaveProperty('--slidev-laser-color')
     expect(vars['--slidev-laser-size']).toBe('14px')
   })
+
+  it.each([[123], [null], ['']])('rejects non-color value %s', (color) => {
+    expect(() => resolveLaser({ color: color as any })).toThrow(/laserPointer\.color/)
+  })
+  it('rejects a mistyped okabe preset and lists the valid ones', () => {
+    expect(() => resolveLaser({ color: 'okabe-bleu' })).toThrow(/okabe-blue/)
+  })
+  it('rejects unknown keys', () => {
+    expect(() => resolveLaser({ colour: 'red' } as any)).toThrow(/colour/)
+  })
+  it.each([['abc'], [42], [[]]])('rejects non-object config %s', (cfg) => {
+    expect(() => resolveLaser(cfg as any)).toThrow(/laserPointer must be an object/)
+  })
+  it.each([['false'], [0], [null]])('rejects non-boolean glow %s', (glow) => {
+    expect(() => resolveLaser({ glow: glow as any })).toThrow(/laserPointer\.glow/)
+  })
+  it('does not treat inherited object members as presets', () => {
+    expect(resolveLaser({ color: 'toString' })!['--slidev-laser-color']).toBe('toString')
+  })
+  it('uses the injected validator to reject unparseable colors', () => {
+    expect(() => resolveLaser({ color: 'nope' }, { isColor: () => false })).toThrow(/laserPointer\.color.*nope/)
+    expect(resolveLaser({ color: 'okabe-blue' }, { isColor: () => false })!['--slidev-laser-color']).toBe('#0072B2')
+  })
 })
