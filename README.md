@@ -10,10 +10,11 @@ Later: speaker-controlled live UI synced to the audience.
 - Reference: slidev `packages/client/internals/LaserPointer.vue`
 
 ## Success Criteria
-- [ ] `laserPointer: { color, size }` in headmatter changes the laser in play and presenter/viewer views
-- [ ] Okabe-Ito colorblind-safe presets selectable by name
-- [ ] Without config, the pointer looks exactly like stock Slidev
+- [x] `laserPointer: { color, size }` in headmatter changes the laser in play and presenter/viewer views
+- [x] Okabe-Ito colorblind-safe presets selectable by name
+- [x] Without config, the pointer looks exactly like stock Slidev
 - [ ] Notes on what a speaker-UI sync extension needs
 
 ## Current State / Progress
 - **2026-11-11** — Brainstormed; approach B (config-driven CSS-variable addon) chosen. Design: docs/design.md. Awaiting design approval; no code yet.
+- **2026-11-11** — Built v0.0.1: resolver (11 unit tests), addon (global-top.vue + styles), demo decks, e2e check (configured: 14px okabe-blue; stock: 6px red gradient), HMR cleanup verified. UI-sync findings in docs/design.md. Addon usage: ADDON-README.md.

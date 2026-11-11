@@ -59,3 +59,15 @@ Chosen: B. Fallback to C if the CSS override proves brittle.
 - `$slidev.configs` exposes custom headmatter keys.
 - Override wins over scoped styles in the production build.
 - Dot is visible on the presenter's own screen and the viewer screen.
+
+## Findings (build, 2026-11-11)
+- `$slidev.configs` does expose custom headmatter keys (verified). In `global-top.vue` it is read via `useSlideContext().$slidev.configs`; importing `@slidev/client/env` does not resolve.
+- Addon path in `addons:` resolves from the working directory, not from the deck file.
+- The laser is localStorage-controlled per client: `slidev-cursor-style` stores the raw string `laser`.
+- Class + variables are removed on HMR / config removal (verified); presenter view gets the override too.
+- Implementation uses a gating class (`html.slidev-laser-custom`) rather than CSS fallbacks equal to stock.
+
+### What a speaker-UI sync extension would need (not built)
+1. Replace the config read in `global-top.vue` with a ref: author config = default, speaker choice (localStorage) = override. CSS layer unchanged.
+2. A UI: Slidev's Settings panel is internal, so either a small floating control in `global-top.vue` or a presenter-page slot; color swatches (the presets) plus a size slider.
+3. Audience sync: each client draws its own dot, so the presenter's choice must reach viewers. Slidev's `createSyncState(serverState, defaultState, persist)` (`@slidev/client/state/syncState`) is the mechanism behind `sharedState` (carries `cursor: {x, y, style}`). Open question, needs a spike: whether an addon can open its own channel (needs a server-side counterpart) or can safely piggyback extra fields on `sharedState` and have them survive the server round-trip. Fallback with no sync: the speaker's choice only affects their own screen, and viewers keep the author's config.
