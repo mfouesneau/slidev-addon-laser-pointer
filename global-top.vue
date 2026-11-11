@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useSlideContext } from '@slidev/client'
 import { onScopeDispose, watchEffect } from 'vue'
+import LaserControl from './src/LaserControl.vue'
+import { mergeConfig } from './src/mergeConfig'
+import { override } from './src/overrideState'
 import { resolveLaser } from './src/resolveLaser'
 
 const { $slidev } = useSlideContext()
@@ -19,7 +22,7 @@ watchEffect(() => {
   clear()
   let vars: Record<string, string> | null
   try {
-    vars = resolveLaser($slidev.configs.laserPointer as any, { isColor: c => CSS.supports('color', c) })
+    vars = resolveLaser(mergeConfig($slidev.configs.laserPointer as any, override.value), { isColor: c => CSS.supports('color', c) })
   }
   catch (err) {
     // Fail soft during a talk: keep the stock pointer, but say why.
@@ -39,5 +42,5 @@ onScopeDispose(clear)
 </script>
 
 <template>
-  <div hidden />
+  <LaserControl />
 </template>

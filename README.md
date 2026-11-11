@@ -11,8 +11,12 @@ Requires Slidev >= 53 (the addon only uses `global-top.vue`, a stylesheet and th
 Not on npm yet. Until it is, pick one:
 
 ```bash
-# from a local checkout
+# from a local checkout (symlinks it; good for hacking on the addon)
 npm install --save-dev /path/to/slidev-addon-laser-pointer
+
+# or as a packed tarball (what a published install looks like; good for trying it)
+(cd /path/to/slidev-addon-laser-pointer && npm pack)        # creates slidev-addon-laser-pointer-0.0.1.tgz
+npm install --save-dev /path/to/slidev-addon-laser-pointer/slidev-addon-laser-pointer-0.0.1.tgz
 
 # or straight from a git remote, once pushed
 npm install --save-dev github:<user>/slidev-addon-laser-pointer
@@ -41,8 +45,23 @@ from the parent of the folder that holds your deck file (observed with Slidev 53
 Then turn the laser on while presenting: Settings (gear icon) > Cursor style > **Laser**.
 The addon changes how the laser looks; it does not turn it on.
 
+## Change it live (speaker control)
+
+With the addon enabled, a small round button sits in the bottom-right corner of the slide view (faint until you hover it).
+It opens a panel with:
+
+- the seven colorblind-safe swatches, plus a custom color picker
+- a size slider (4 to 40 slide px)
+- a glow toggle
+- **Reset to deck default**
+
+Your choice beats the deck's `laserPointer` config and the stock look, in that order.
+It only affects your own screen: nothing is synced to the audience, and it resets when you reload the page.
+Slide shortcuts are paused while the panel is open, so typing in it won't change slides. The button is hidden when printing or exporting.
+Works whether or not the deck has a `laserPointer` config, so a deck with no config still gets the button.
+
 Notes:
-- No `laserPointer` key: the pointer is untouched (stock Slidev).
+- No `laserPointer` key: the pointer is stock Slidev until you pick something in the panel.
 - Every viewer's browser draws its own dot, so the audience sees the same color and size, as long as they load the same deck.
 - A bad value (misspelled preset, `size: 0`, unknown key) logs a warning in the browser console and keeps the stock pointer; the deck still loads.
 
@@ -75,7 +94,8 @@ npm install
 npm test                 # unit tests for the config resolver
 npm run demo             # configured deck on :3031
 npm run demo:stock       # unconfigured deck on :3032
-node scripts/check-laser.mjs http://localhost:3031/1 http://localhost:3032/1   # browser check
+node scripts/check-laser.mjs http://localhost:3031/1 http://localhost:3032/1   # config check (playwright)
+node scripts/check-ui.mjs http://localhost:3031 http://localhost:3032            # speaker-control check (playwright)
 ```
 
 Design: `docs/design.md`. Plan: `docs/plan.md`.
@@ -105,3 +125,4 @@ Later: speaker-controlled live UI synced to the audience.
 - **2026-11-11** — Review fix pass: strict validation (unknown keys, bad color/glow/config type, mistyped okabe preset, browser CSS.supports check), fail-soft to stock with console.warn. 24 tests. Deferred minors: block `url()` colors, size cap, license/repository, size-only e2e case.
 - **2026-11-11** — README rewritten as the addon doc (install, enable, options, presets); local-path install + enable-by-name verified in a clean consumer project. ADDON-README.md removed (npm ships README.md).
 - **2026-11-11** — sharedState spike (see docs/design.md, "Spike: sharedState"): extra fields sync in dev and static builds; deletes do not sync in static builds. Spike files in spike/ (throwaway). Corrected the `addons:` relative-path rule.
+- **2026-11-11** — Speaker UI v1 built (floating button, local-only, session-only; decisions in docs/design.md addendum). 31 unit tests; scripts/check-ui.mjs 10 checks; verified from a packed tarball in a clean project. Dev note: start the two demo servers a few seconds apart (shared Vite cache race).

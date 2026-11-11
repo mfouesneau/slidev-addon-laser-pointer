@@ -93,3 +93,10 @@ Conclusions for the speaker UI:
 
 ### Gotcha hit during the spike
 - A spike component written as `;(window as any).x = ...` crashed `GlobalTop` with `_useSlideContext(...) is not a function`, in the pad and in a clean project alike. Rewriting it as plain statements (`const w = window as any; w.x = ...`) fixed it. The root cause is unverified (suspect: Slidev injects code into global layers and the leading `;(` collides with it). Avoid that form.
+
+## Addendum: speaker UI v1 (decided 2026-11-11)
+User decisions: floating button; **local only** (no sync, no `sharedState` writes); **session only** (module-level ref, resets on reload).
+- Precedence: speaker override > author `laserPointer` > stock. Pure `mergeConfig(author, override)` feeds `resolveLaser`.
+- `LaserControl.vue`, teleported to `<body>` (the slide container is scaled), rendered by `global-top.vue` once per page (not in the presenter's next-slide preview). Small corner button, faint until hover; popover with the 7 Okabe-Ito swatches, a custom color input, size slider (4-40 slide px), glow toggle, "reset to deck default".
+- Keys typed in the popover must not navigate slides. Hidden in print/export.
+- Sync to the audience is out of scope for v1; the safeguards in the sharedState spike section apply if it is added.
