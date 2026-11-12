@@ -4,6 +4,14 @@
   "description": "Slidev addon: configurable laser pointer color and size",
   "license": "BSD-3-Clause",
   "author": "Morgan Fouesneau",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfouesneau/slidev-addon-laser-pointer.git"
+  },
+  "homepage": "https://github.com/mfouesneau/slidev-addon-laser-pointer#readme",
+  "bugs": {
+    "url": "https://github.com/mfouesneau/slidev-addon-laser-pointer/issues"
+  },
   "type": "module",
   "keywords": [
     "slidev-addon",

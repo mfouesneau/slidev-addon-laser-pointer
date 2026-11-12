@@ -18,8 +18,8 @@ npm install --save-dev /path/to/slidev-addon-laser-pointer
 (cd /path/to/slidev-addon-laser-pointer && npm pack)        # creates slidev-addon-laser-pointer-0.0.2.tgz
 npm install --save-dev /path/to/slidev-addon-laser-pointer/slidev-addon-laser-pointer-0.0.2.tgz
 
-# or straight from a git remote, once pushed
-npm install --save-dev github:<user>/slidev-addon-laser-pointer
+# or straight from GitHub
+npm install --save-dev github:mfouesneau/slidev-addon-laser-pointer
 ```
 
 Once published: `npm install --save-dev slidev-addon-laser-pointer`.
